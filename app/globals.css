@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+.app-shell {
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 22%),
+    radial-gradient(circle at top right, rgba(191, 219, 254, 0.65), transparent 26%),
+    linear-gradient(180deg, #f8fbff 0%, #f8fafc 100%);
+}
+
+.field {
+  @apply w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:bg-white focus:ring-4 focus:ring-brand-100;
+}
