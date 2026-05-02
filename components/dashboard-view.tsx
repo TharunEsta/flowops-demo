@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Activity,
-  CalendarRange,
-  CircleDollarSign,
-  Users,
-} from "lucide-react";
+import { Activity, CalendarRange, CircleDollarSign, Users } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -36,6 +31,7 @@ const chartGridColor = "#e8eef8";
 const chartAxisColor = "#94a3b8";
 const chartBlue = "#4f8df7";
 const chartBlueSoft = "#8bb8ff";
+const bookingSources = ["WhatsApp", "Call", "Website"] as const;
 
 export function DashboardView() {
   const { industry } = useIndustry();
@@ -46,18 +42,18 @@ export function DashboardView() {
 
   const summaryItems = [
     {
-      label: "Booked today",
-      value: `${stats.todaysBookings} active today`,
+      label: "Bookings confirmed",
+      value: `${stats.todaysBookings} bookings confirmed today`,
       icon: CalendarRange
     },
     {
-      label: "Pending follow-ups",
-      value: `${bookings.filter((item) => item.status === "Pending").length} leads to nudge`,
+      label: "Follow-ups needed",
+      value: `${bookings.filter((item) => item.status === "Pending").length} leads need follow-up`,
       icon: Activity
     },
     {
       label: "Top service",
-      value: bookings[0]?.service ?? config.services[0],
+      value: `Top service: ${bookings[0]?.service ?? config.services[0]}`,
       icon: Users
     }
   ];
@@ -72,21 +68,37 @@ export function DashboardView() {
               Dashboard
             </p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-              {config.label} lead workflow overview
+              {config.label} daily bookings and revenue
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-500">
-              Track bookings, lead quality, and revenue performance across a structured conversion funnel.
+              See what was booked, what still needs follow-up, and where today&apos;s revenue is coming from.
             </p>
           </div>
         </div>
 
         <div className="rounded-2xl border border-brand-100 bg-gradient-to-r from-brand-50 via-white to-white p-5 shadow-[0_18px_40px_-28px_rgba(37,99,235,0.25)] transition duration-300 hover:shadow-[0_20px_50px_-28px_rgba(37,99,235,0.3)] sm:p-6">
           <p className="text-sm font-semibold text-slate-800">
-            This dashboard shows all bookings, revenue, and follow-ups in one place.
+            All bookings from WhatsApp, calls, and website are captured here automatically.
           </p>
           <div className="mt-4 flex flex-col gap-3 lg:flex-row">
             <InfoPill label="Source" value="WhatsApp / Call / Website" />
             <InfoPill label="Status" value="Booked / Follow-up / Completed" />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.16)] sm:p-6">
+          <p className="text-sm font-semibold text-slate-800">
+            How bookings move through your business
+          </p>
+          <div className="mt-4 flex flex-col gap-3 text-sm font-medium text-slate-600 lg:flex-row lg:items-center lg:gap-2">
+            {["WhatsApp", "Booking", "Dashboard", "Follow-up", "Conversion"].map((step, index) => (
+              <div key={step} className="flex items-center gap-2">
+                <span className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-800">
+                  {step}
+                </span>
+                {index < 4 ? <span className="hidden text-brand-500 lg:inline">→</span> : null}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -94,17 +106,25 @@ export function DashboardView() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Today’s Bookings"
+          subtext="Patients who confirmed appointments today"
           value={String(stats.todaysBookings)}
           icon={CalendarRange}
         />
-        <StatCard label="Total Leads" value={String(stats.totalLeads)} icon={Users} />
+        <StatCard
+          label="Total Enquiries"
+          subtext="All leads captured from every channel"
+          value={String(stats.totalLeads)}
+          icon={Users}
+        />
         <StatCard
           label="Conversion Rate"
+          subtext="How many enquiries turned into bookings"
           value={`${stats.conversionRate}%`}
           icon={Activity}
         />
         <StatCard
           label="Today’s Revenue"
+          subtext="Revenue expected from confirmed bookings"
           value={currencyFormatter.format(stats.todaysRevenue)}
           icon={CircleDollarSign}
         />
@@ -113,9 +133,9 @@ export function DashboardView() {
       <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_-30px_rgba(15,23,42,0.22)]">
           <div className="mb-6 flex flex-col gap-2">
-            <h2 className="text-xl font-semibold text-slate-950">Pipeline activity</h2>
+            <h2 className="text-xl font-semibold text-slate-950">Your Weekly Bookings & Revenue</h2>
             <p className="text-sm leading-6 text-slate-500">
-              Bookings and revenue trends across the last 7 days.
+              A simple view of how enquiries are turning into bookings and revenue over the last 7 days.
             </p>
           </div>
 
@@ -185,7 +205,12 @@ export function DashboardView() {
                       backgroundColor: "#ffffff"
                     }}
                   />
-                  <Bar dataKey="revenue" fill={chartBlueSoft} radius={[12, 12, 4, 4]} maxBarSize={36} />
+                  <Bar
+                    dataKey="revenue"
+                    fill={chartBlueSoft}
+                    radius={[12, 12, 4, 4]}
+                    maxBarSize={36}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -195,13 +220,13 @@ export function DashboardView() {
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_-30px_rgba(15,23,42,0.22)]">
           <div className="mb-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-              Workflow Summary
+              Today’s Actions
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-slate-950">
-              {config.bookingLabel}
+              What Needs Attention
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-500">
-              A compact view of the signals your team would watch throughout the day.
+              Focus here to improve today&apos;s results.
             </p>
           </div>
 
@@ -218,12 +243,55 @@ export function DashboardView() {
         </div>
       </section>
 
+      <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-white p-6 shadow-[0_18px_40px_-30px_rgba(37,99,235,0.18)] transition duration-300 hover:shadow-[0_24px_56px_-30px_rgba(37,99,235,0.24)]">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
+            Monthly Impact
+          </p>
+          <div className="mt-4 space-y-3">
+            <p className="text-2xl font-bold tracking-tight text-slate-950">+5 extra bookings/day</p>
+            <p className="text-lg font-semibold text-slate-700">₹400 per booking</p>
+            <p className="text-3xl font-bold tracking-tight text-brand-700">
+              = ₹60,000/month potential increase
+            </p>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-500">
+            Even a small lift in captured bookings and follow-ups can make a meaningful difference to monthly revenue.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:shadow-[0_24px_56px_-30px_rgba(15,23,42,0.22)]">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
+            How this works
+          </p>
+          <div className="mt-5 grid gap-3">
+            {[
+              "Lead comes in (WhatsApp / call / web)",
+              "Booking is captured instantly",
+              "Data appears in dashboard",
+              "Follow-ups are triggered",
+              "Conversion improves"
+            ].map((step, index) => (
+              <div
+                key={step}
+                className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-slate-50/70 px-4 py-3"
+              >
+                <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700">
+                  {index + 1}
+                </span>
+                <p className="text-sm font-medium text-slate-700">{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:shadow-[0_24px_56px_-30px_rgba(15,23,42,0.22)]">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-950">Recent bookings</h2>
             <p className="text-sm leading-6 text-slate-500">
-              Example data for the current industry view.
+              Example data showing where bookings come from and what needs follow-up.
             </p>
           </div>
         </div>
@@ -235,19 +303,25 @@ export function DashboardView() {
                 <tr className="text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   <th className="px-5 py-4">Name</th>
                   <th className="px-5 py-4">Phone</th>
+                  <th className="px-5 py-4">Source</th>
                   <th className="px-5 py-4">Service</th>
                   <th className="px-5 py-4">Time</th>
                   <th className="px-5 py-4">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {bookings.map((entry) => (
+                {bookings.map((entry, index) => (
                   <tr
                     key={entry.id}
                     className="text-sm text-slate-600 transition duration-200 hover:bg-brand-50/40"
                   >
                     <td className="px-5 py-4 font-medium text-slate-900">{entry.name}</td>
                     <td className="px-5 py-4">{entry.phone}</td>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                        {bookingSources[index % bookingSources.length]}
+                      </span>
+                    </td>
                     <td className="px-5 py-4">{entry.service}</td>
                     <td className="px-5 py-4">{entry.time}</td>
                     <td className="px-5 py-4">
@@ -282,10 +356,12 @@ function InfoPill({ label, value }: { label: string; value: string }) {
 
 function StatCard({
   label,
+  subtext,
   value,
   icon: Icon
 }: {
   label: string;
+  subtext: string;
   value: string;
   icon: React.ComponentType<{ className?: string }>;
 }) {
@@ -299,6 +375,7 @@ function StatCard({
       </div>
       <p className="mt-5 text-sm font-medium text-slate-500">{label}</p>
       <p className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-500">{subtext}</p>
     </div>
   );
 }
