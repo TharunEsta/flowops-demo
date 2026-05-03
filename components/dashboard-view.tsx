@@ -40,22 +40,10 @@ export function DashboardView() {
   const bookings = getBookingsByIndustry(industry);
   const chartData = weeklyBookingTrends[industry];
 
-  const summaryItems = [
-    {
-      label: "Bookings confirmed",
-      value: `${stats.todaysBookings} bookings confirmed today`,
-      icon: CalendarRange
-    },
-    {
-      label: "Follow-ups needed",
-      value: `${bookings.filter((item) => item.status === "Pending").length} leads need follow-up`,
-      icon: Activity
-    },
-    {
-      label: "Top service",
-      value: `Top service: ${bookings[0]?.service ?? config.services[0]}`,
-      icon: Users
-    }
+  const nextActions = [
+    "Call 4 pending leads",
+    "Confirm 2 tentative bookings",
+    "Follow up on yesterday's enquiries"
   ];
 
   return (
@@ -72,6 +60,9 @@ export function DashboardView() {
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-500">
               See what was booked, what still needs follow-up, and where today&apos;s revenue is coming from.
+            </p>
+            <p className="mt-2 text-sm font-medium text-slate-600">
+              This shows what&apos;s happening and what to do next.
             </p>
           </div>
         </div>
@@ -103,31 +94,44 @@ export function DashboardView() {
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Today’s Bookings"
-          subtext="Patients who confirmed appointments today"
-          value={String(stats.todaysBookings)}
-          icon={CalendarRange}
-        />
-        <StatCard
-          label="Total Enquiries"
-          subtext="All leads captured from every channel"
-          value={String(stats.totalLeads)}
-          icon={Users}
-        />
-        <StatCard
-          label="Conversion Rate"
-          subtext="How many enquiries turned into bookings"
-          value={`${stats.conversionRate}%`}
-          icon={Activity}
-        />
-        <StatCard
-          label="Today’s Revenue"
-          subtext="Revenue expected from confirmed bookings"
-          value={currencyFormatter.format(stats.todaysRevenue)}
-          icon={CircleDollarSign}
-        />
+      <section>
+        <p className="mb-4 text-sm font-medium text-slate-500">
+          Track bookings, follow-ups, and revenue in one place.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <StatCard
+            label="Today’s Bookings"
+            subtext="Patients who confirmed appointments today"
+            value={String(stats.todaysBookings)}
+            icon={CalendarRange}
+          />
+          <StatCard
+            label="Total Enquiries"
+            subtext="All leads captured from every channel"
+            value={String(stats.totalLeads)}
+            icon={Users}
+          />
+          <StatCard
+            label="Conversion Rate"
+            subtext="How many enquiries turned into bookings"
+            value={`${stats.conversionRate}%`}
+            icon={Activity}
+          />
+          <StatCard
+            label="Today’s Revenue"
+            subtext="Revenue expected from confirmed bookings"
+            value={currencyFormatter.format(stats.todaysRevenue)}
+            icon={CircleDollarSign}
+          />
+          <StatCard
+            label="Missed Revenue Today"
+            subtext="Potential revenue lost due to missed or delayed follow-ups"
+            value="₹8,000"
+            icon={CircleDollarSign}
+            accentClass="border-orange-200/80 hover:border-orange-300"
+            iconClass="bg-orange-50 text-orange-600 group-hover:bg-orange-100"
+          />
+        </div>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
@@ -220,24 +224,27 @@ export function DashboardView() {
         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_-30px_rgba(15,23,42,0.22)]">
           <div className="mb-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
-              Today’s Actions
+              What You Should Do Next
             </p>
             <h2 className="mt-3 text-2xl font-semibold text-slate-950">
-              What Needs Attention
+              Today&apos;s priority actions
             </h2>
             <p className="mt-3 text-sm leading-7 text-slate-500">
-              Focus here to improve today&apos;s results.
+              These actions can directly improve today&apos;s results.
             </p>
           </div>
 
-          <div className="grid gap-4">
-            {summaryItems.map((item) => (
-              <MiniStatCard
-                key={item.label}
-                label={item.label}
-                value={item.value}
-                icon={item.icon}
-              />
+          <div className="grid gap-3">
+            {nextActions.map((item) => (
+              <div
+                key={item}
+                className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-4 transition duration-300 hover:border-brand-200 hover:bg-white"
+              >
+                <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-brand-100 text-[11px] font-bold text-brand-700">
+                  ✓
+                </span>
+                <p className="text-sm font-medium text-slate-700">{item}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -282,6 +289,56 @@ export function DashboardView() {
                 <p className="text-sm font-medium text-slate-700">{step}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:shadow-[0_24px_56px_-30px_rgba(15,23,42,0.22)]">
+        <div className="mb-6">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">
+            Decision Support
+          </p>
+          <h2 className="mt-3 text-xl font-semibold text-slate-950">
+            Without a System vs With This System
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            This shows what&apos;s happening and what to do next.
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50 p-5">
+            <h3 className="text-lg font-semibold text-slate-900">Without a System</h3>
+            <ul className="mt-4 grid gap-3">
+              {[
+                "Missed calls",
+                "No clear tracking",
+                "Random follow-ups",
+                "Unpredictable bookings"
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                  <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border border-brand-100 bg-brand-50/60 p-5">
+            <h3 className="text-lg font-semibold text-slate-900">With This System</h3>
+            <ul className="mt-4 grid gap-3">
+              {[
+                "All leads captured",
+                "Clear follow-up steps",
+                "Structured bookings",
+                "Predictable revenue"
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                  <span className="h-2.5 w-2.5 rounded-full bg-brand-400" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
@@ -358,17 +415,23 @@ function StatCard({
   label,
   subtext,
   value,
-  icon: Icon
+  icon: Icon,
+  accentClass = "border-slate-200/80 hover:border-brand-200",
+  iconClass = "bg-brand-50 text-brand-600 group-hover:bg-brand-100"
 }: {
   label: string;
   subtext: string;
   value: string;
   icon: React.ComponentType<{ className?: string }>;
+  accentClass?: string;
+  iconClass?: string;
 }) {
   return (
-    <div className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-[0_24px_56px_-30px_rgba(37,99,235,0.24)]">
+    <div
+      className={`group rounded-2xl border bg-white p-5 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_-30px_rgba(37,99,235,0.24)] ${accentClass}`}
+    >
       <div className="flex items-start justify-between">
-        <div className="rounded-xl bg-brand-50 p-3 text-brand-600 transition duration-300 group-hover:bg-brand-100">
+        <div className={`rounded-xl p-3 transition duration-300 ${iconClass}`}>
           <Icon className="h-5 w-5" />
         </div>
         <div className="h-2 w-2 rounded-full bg-brand-200" />
@@ -376,30 +439,6 @@ function StatCard({
       <p className="mt-5 text-sm font-medium text-slate-500">{label}</p>
       <p className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{value}</p>
       <p className="mt-2 text-sm leading-6 text-slate-500">{subtext}</p>
-    </div>
-  );
-}
-
-function MiniStatCard({
-  label,
-  value,
-  icon: Icon
-}: {
-  label: string;
-  value: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <div className="group rounded-2xl border border-slate-200/80 bg-slate-50/70 p-5 transition duration-300 hover:border-brand-200 hover:bg-white hover:shadow-[0_18px_40px_-30px_rgba(37,99,235,0.18)]">
-      <div className="flex items-start gap-4">
-        <div className="rounded-xl bg-white p-3 text-brand-600 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.2)] transition duration-300 group-hover:bg-brand-50">
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">{value}</p>
-        </div>
-      </div>
     </div>
   );
 }
